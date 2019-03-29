@@ -49,11 +49,13 @@ ad.start();
 - 一些实现方式
     - VideoView
     - MediaPlayer + SurfaceView
+     - MediaPlayer + TextureView（采取方案）
     - 视频播放器适配应该算得上是最复杂的
 ![](/png/视频播放器的几种方式.png)
     
 - 自定义一个适配播放器
     - 播放器生命周期
     - 那些坑
+![](/png/播放器常见的坑.png)
    
    
