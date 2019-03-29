@@ -76,6 +76,7 @@ public final class ViewfinderView extends View {
     private int slideTop;
     private int slideBottom;
     private boolean isFirst;
+    private final Rect lineRect;
 
     // This constructor is used when the class is built from an XML resource.
     public ViewfinderView(Context context, AttributeSet attrs) {
@@ -88,7 +89,8 @@ public final class ViewfinderView extends View {
         maskColor = resources.getColor(R.color.viewfinder_mask);
         resultColor = resources.getColor(R.color.result_view);
         resultPointColor = resources.getColor(R.color.possible_result_points);
-        possibleResultPoints = new HashSet<ResultPoint>(5);
+        possibleResultPoints = new HashSet<>(5);
+        lineRect = new Rect();
 
         density = context.getResources().getDisplayMetrics().density;
         ScreenRate = (int) (15 * density);
@@ -106,15 +108,15 @@ public final class ViewfinderView extends View {
             slideTop = frame.top;
             slideBottom = frame.bottom;
         }
-        int width = canvas.getWidth();
-        int height = canvas.getHeight();
+        // 获取当前canvas图层宽高即为获取当前view宽高
+        int width = getWidth();
+        int height = getHeight();
 
         // Draw the exterior (i.e. outside the framing rect) darkened
         paint.setColor(resultBitmap != null ? resultColor : maskColor);
         canvas.drawRect(0, 0, width, frame.top, paint);
         canvas.drawRect(0, frame.top, frame.left, frame.bottom + 1, paint);
-        canvas.drawRect(frame.right + 1, frame.top, width, frame.bottom + 1,
-                paint);
+        canvas.drawRect(frame.right + 1, frame.top, width, frame.bottom + 1, paint);
         canvas.drawRect(0, frame.bottom + 1, width, height, paint);
 
         if (resultBitmap != null) {
@@ -124,35 +126,25 @@ public final class ViewfinderView extends View {
         } else {
 
             paint.setColor(Color.BLUE);
-            canvas.drawRect(frame.left, frame.top, frame.left + ScreenRate,
-                    frame.top + CORNER_WIDTH, paint);
-            canvas.drawRect(frame.left, frame.top, frame.left + CORNER_WIDTH,
-                    frame.top + ScreenRate, paint);
-            canvas.drawRect(frame.right - ScreenRate, frame.top, frame.right,
-                    frame.top + CORNER_WIDTH, paint);
-            canvas.drawRect(frame.right - CORNER_WIDTH, frame.top, frame.right,
-                    frame.top + ScreenRate, paint);
-            canvas.drawRect(frame.left, frame.bottom - CORNER_WIDTH, frame.left
-                    + ScreenRate, frame.bottom, paint);
-            canvas.drawRect(frame.left, frame.bottom - ScreenRate, frame.left
-                    + CORNER_WIDTH, frame.bottom, paint);
-            canvas.drawRect(frame.right - ScreenRate, frame.bottom
-                    - CORNER_WIDTH, frame.right, frame.bottom, paint);
-            canvas.drawRect(frame.right - CORNER_WIDTH, frame.bottom
-                    - ScreenRate, frame.right, frame.bottom, paint);
+            canvas.drawRect(frame.left, frame.top, frame.left + ScreenRate, frame.top + CORNER_WIDTH, paint);
+            canvas.drawRect(frame.left, frame.top, frame.left + CORNER_WIDTH, frame.top + ScreenRate, paint);
+            canvas.drawRect(frame.right - ScreenRate, frame.top, frame.right, frame.top + CORNER_WIDTH, paint);
+            canvas.drawRect(frame.right - CORNER_WIDTH, frame.top, frame.right, frame.top + ScreenRate, paint);
+            canvas.drawRect(frame.left, frame.bottom - CORNER_WIDTH, frame.left + ScreenRate, frame.bottom, paint);
+            canvas.drawRect(frame.left, frame.bottom - ScreenRate, frame.left + CORNER_WIDTH, frame.bottom, paint);
+            canvas.drawRect(frame.right - ScreenRate, frame.bottom - CORNER_WIDTH, frame.right, frame.bottom, paint);
+            canvas.drawRect(frame.right - CORNER_WIDTH, frame.bottom - ScreenRate, frame.right, frame.bottom, paint);
 
             slideTop += SPEEN_DISTANCE;
             if (slideTop >= frame.bottom) {
                 slideTop = frame.top;
             }
-            Rect lineRect = new Rect();
+
             lineRect.left = frame.left;
             lineRect.right = frame.right;
             lineRect.top = slideTop;
             lineRect.bottom = slideTop + 18;
-            canvas.drawBitmap(((BitmapDrawable) (getResources()
-                            .getDrawable(R.drawable.fle))).getBitmap(), null, lineRect,
-                    paint);
+            canvas.drawBitmap(((BitmapDrawable) (getResources().getDrawable(R.drawable.fle))).getBitmap(), null, lineRect, paint);
 
             paint.setColor(Color.WHITE);
             paint.setTextSize(TEXT_SIZE * density);
@@ -161,11 +153,7 @@ public final class ViewfinderView extends View {
             String text = getResources().getString(R.string.scan_text);
             float textWidth = paint.measureText(text);
 
-            canvas.drawText(
-                    text,
-                    (width - textWidth) / 2,
-                    (float) (frame.bottom + (float) TEXT_PADDING_TOP * density),
-                    paint);
+            canvas.drawText(text, (width - textWidth) / 2, (float) (frame.bottom + (float) TEXT_PADDING_TOP * density), paint);
 
             Collection<ResultPoint> currentPossible = possibleResultPoints;
             Collection<ResultPoint> currentLast = lastPossibleResultPoints;
@@ -177,21 +165,18 @@ public final class ViewfinderView extends View {
                 paint.setAlpha(OPAQUE);
                 paint.setColor(resultPointColor);
                 for (ResultPoint point : currentPossible) {
-                    canvas.drawCircle(frame.left + point.getX(), frame.top
-                            + point.getY(), 6.0f, paint);
+                    canvas.drawCircle(frame.left + point.getX(), frame.top + point.getY(), 6.0f, paint);
                 }
             }
             if (currentLast != null) {
                 paint.setAlpha(OPAQUE / 2);
                 paint.setColor(resultPointColor);
                 for (ResultPoint point : currentLast) {
-                    canvas.drawCircle(frame.left + point.getX(), frame.top
-                            + point.getY(), 3.0f, paint);
+                    canvas.drawCircle(frame.left + point.getX(), frame.top + point.getY(), 3.0f, paint);
                 }
             }
 
-            postInvalidateDelayed(ANIMATION_DELAY, frame.left, frame.top,
-                    frame.right, frame.bottom);
+            postInvalidateDelayed(ANIMATION_DELAY, frame.left, frame.top, frame.right, frame.bottom);
         }
     }
 

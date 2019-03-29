@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 
 import com.youdu.constant.Constant;
@@ -33,7 +32,7 @@ public class BaseFragment extends Fragment {
 
         for (String permisson : permissions) {
             if (ContextCompat.checkSelfPermission(getActivity(), permisson)
-                != PackageManager.PERMISSION_GRANTED) {
+                    != PackageManager.PERMISSION_GRANTED) {
                 return false;
             }
         }
@@ -45,15 +44,17 @@ public class BaseFragment extends Fragment {
         switch (requestCode) {
             case Constant.HARDWEAR_CAMERA_CODE:
                 if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     doOpenCamera();
                 }
                 break;
             case Constant.WRITE_READ_EXTERNAL_CODE:
                 if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     doWriteSDCard();
                 }
+                break;
+            default:
                 break;
         }
     }

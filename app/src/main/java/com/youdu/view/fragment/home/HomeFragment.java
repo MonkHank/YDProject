@@ -41,7 +41,6 @@ import com.youdu.zxing.app.CaptureActivity;
  * @修改历史：2015年10月2日创建初始版本 ********************************************************
  */
 public class HomeFragment extends BaseFragment implements View.OnClickListener, AdapterView.OnItemClickListener {
-
     private static final int REQUEST_QRCODE = 0x01;
     /**
      * UI

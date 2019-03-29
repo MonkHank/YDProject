@@ -1,4 +1,4 @@
-## <span id=3>组件化封装思想实战 <font size=1>[回到目录](#0)
+# 组件化封装思想实战 
 - fragment的几种切换模式
     - add+show/hide，replace，attach/detach
     - attach/detach很少用到，不会销毁fragment，而是会销毁fragment的view
@@ -29,3 +29,12 @@ ad.start();
 - ListView
     - int getItemViewType()
     - int getItemCount(int position)
+    
+- Intent打开可提供选项相册
+```java
+// Intent createChooser(Intent target, CharSequence title);方法
+ Intent innerIntent = new Intent(Intent.ACTION_GET_CONTENT);
+ innerIntent.setType("image/*");
+ Intent wrapperIntent = Intent.createChooser(innerIntent, "选择二维码图片");
+ startActivityForResult(wrapperIntent, REQUEST_CODE);
+```

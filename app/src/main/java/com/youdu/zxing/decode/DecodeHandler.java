@@ -75,7 +75,7 @@ final class DecodeHandler extends Handler
 	{
 		long start = System.currentTimeMillis();
 		Result rawResult = null;
-		/***********************�޸�Ϊ������ʼ******************************/
+		/***********************???????????******************************/
 		byte[] rotatedData = new byte[data.length];
 		for (int y = 0; y < height; y++)
 		{
@@ -86,7 +86,7 @@ final class DecodeHandler extends Handler
 		width = height;
 		height = tmp;
 		data = rotatedData;
-		/***********************�޸�Ϊ��������******************************/
+		/***********************????????????******************************/
 		PlanarYUVLuminanceSource source = CameraManager.get().buildLuminanceSource(data, width, height);
 		BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
 		try

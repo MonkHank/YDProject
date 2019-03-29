@@ -196,7 +196,8 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
                 isFlash = !isFlash;
             } else if (id == R.id.photo_btn) {
                 // 打开手机中的相册
-                Intent innerIntent = new Intent(Intent.ACTION_GET_CONTENT); // "android.intent.action.GET_CONTENT"
+                // "android.intent.action.GET_CONTENT"
+                Intent innerIntent = new Intent(Intent.ACTION_GET_CONTENT);
                 innerIntent.setType("image/*");
                 Intent wrapperIntent = Intent.createChooser(innerIntent, "选择二维码图片");
                 startActivityForResult(wrapperIntent, REQUEST_CODE);
