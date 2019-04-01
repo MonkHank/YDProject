@@ -97,5 +97,8 @@ void onSurfaceTextureUpdated(SurfaceTexture surface)
 
 互相创建彼此对象，进行彼此之间的方法调用，耦合度百分比，不可取，采用接口回调机制。
 
-部分手机可以用下面这种方式暂停，但有些不确定机型这种方式暂停不了，所以还是使用setOnSeekCompleteListener回调方式，这个方式适配了全部机型。
+```java
+// 部分手机可以用下面这种方式暂停，但有些不确定机型这种方式暂停不了，所以还是使用setOnSeekCompleteListener回调方式，这个方式适配了全部机型。
 mediaPlayer.pause();
+```
+
