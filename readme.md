@@ -63,3 +63,33 @@ ad.start();
 - 核心类
     - MediaPlayer视频播放核心类 
     - TextureView显示帧数据核心类
+    
+- 回调函数处理
+```java
+// view
+void onVisibilityChanged(View changedView,int visibility)
+boolean onTouchEvent(MontionEvent ev)
+void onClick(View v)
+// MediaPlayer
+void onCompletion(MediaPlayer mp)
+boolean onError(MediaPlayer mp,int what,int extra)
+boolena onInfo(MediaPlayer mp,int what,int extra)
+void onPrepared(MediaPlayer mp)
+void onBufferingUpdate(MediaPlayer mp,int percent)
+// TextureView
+void onSurfaceTextureAvailable(SurfaceTexture surface,int width, int height)
+void onSurfaceTextureSizeChanged(SurfaceTexture surface,int width, int height)
+boolean onSurfaceTextureDestroyed(SurfaceTexture surface)
+void onSurfaceTextureUpdated(SurfaceTexture surface)
+```
+
+- 播放器View实现流
+![](/png/播放器实现流.png)
+
+- 播放器View业务流
+![](/png/播放器业务流.png)
+
+- 思路点拨
+    - 计算播放器在屏幕中出现的百分比
+    - 小屏播放到全屏播放能复用一个播放器，这个功能试过很多次了，即使高级开发工程师也不一定一眼看出来某些功能一眼就能实现与否
+    - 监听播放器产生的各种事件
