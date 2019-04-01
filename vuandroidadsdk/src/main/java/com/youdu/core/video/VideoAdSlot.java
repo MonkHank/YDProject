@@ -27,18 +27,16 @@ import com.youdu.widget.VideoFullDialog.FullToSmallListener;
 public class VideoAdSlot implements ADVideoPlayerListener {
 
     private Context mContext;
-    /**
-     * UI
-     */
+    /*** UI*/
     private CustomVideoView mVideoView;
     private ViewGroup mParentView;
-    /**
-     * Data
-     */
+    /*** Data*/
     private AdValue mXAdInstance;
     private AdSDKSlotListener mSlotListener;
-    private boolean canPause = false; //是否可自动暂停标志位
-    private int lastArea = 0; //防止将要滑入滑出时播放器的状态改变
+    /*** 是否可自动暂停标志位*/
+    private boolean canPause = false;
+    /*** 防止将要滑入滑出时播放器的状态改变*/
+    private int lastArea = 0;
 
     public VideoAdSlot(AdValue adInstance, AdSDKSlotListener slotLitener, ADFrameImageLoadListener frameLoadListener) {
         mXAdInstance = adInstance;
@@ -63,106 +61,7 @@ public class VideoAdSlot implements ADVideoPlayerListener {
         mParentView.addView(mVideoView);
     }
 
-    private boolean isPlaying() {
-        if (mVideoView != null) {
-            return mVideoView.isPlaying();
-        }
-        return false;
-    }
-
-    private boolean isRealPause() {
-        if (mVideoView != null) {
-            return mVideoView.isRealPause();
-        }
-        return false;
-    }
-
-    private boolean isComplete() {
-        if (mVideoView != null) {
-            return mVideoView.isComplete();
-        }
-        return false;
-    }
-
-    //pause the  video
-    private void pauseVideo(boolean isAuto) {
-        if (mVideoView != null) {
-            if (isAuto) {
-                //发自动暂停监测
-                if (!isRealPause() && isPlaying()) {
-                    try {
-                        ReportManager.pauseVideoReport(mXAdInstance.event.pause.content, getPosition());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            mVideoView.seekAndPause(0);
-        }
-    }
-
-    //resume the video
-    private void resumeVideo() {
-        if (mVideoView != null) {
-            mVideoView.resume();
-            if (isPlaying()) {
-                sendSUSReport(true); //发自动播放监测
-            }
-        }
-    }
-
-    public void updateAdInScrollView() {
-        int currentArea = Utils.getVisiblePercent(mParentView);
-        //小于0表示未出现在屏幕上，不做任何处理
-        if (currentArea <= 0) {
-            return;
-        }
-        //刚要滑入和滑出时，异常状态的处理
-        if (Math.abs(currentArea - lastArea) >= 100) {
-            return;
-        }
-        if (currentArea < SDKConstant.VIDEO_SCREEN_PERCENT) {
-            //进入自动暂停状态
-            if (canPause) {
-                pauseVideo(true);
-                canPause = false;
-            }
-            lastArea = 0;
-            mVideoView.setIsComplete(false); // 滑动出50%后标记为从头开始播
-            mVideoView.setIsRealPause(false); //以前叫setPauseButtonClick()
-            return;
-        }
-
-        if (isRealPause() || isComplete()) {
-            //进入手动暂停或者播放结束，播放结束和不满足自动播放条件都作为手动暂停
-            pauseVideo(false);
-            canPause = false;
-            return;
-        }
-
-        //满足自动播放条件或者用户主动点击播放，开始播放
-        if (Utils.canAutoPlay(mContext, AdParameters.getCurrentSetting())
-                || isPlaying()) {
-            lastArea = currentArea;
-            resumeVideo();
-            canPause = true;
-            mVideoView.setIsRealPause(false);
-        } else {
-            pauseVideo(false);
-            mVideoView.setIsRealPause(true); //不能自动播放则设置为手动暂停效果
-        }
-    }
-
-    public void destroy() {
-        mVideoView.destroy();
-        mVideoView = null;
-        mContext = null;
-        mXAdInstance = null;
-    }
-
-    /**
-     * 实现play层接口
-     */
+    /*** 实现play层接口*/
     @Override
     public void onClickFullScreenBtn() {
         try {
@@ -213,6 +112,15 @@ public class VideoAdSlot implements ADVideoPlayerListener {
         mVideoView.setListener(this);
         mVideoView.seekAndPause(0);
         canPause = false;
+    }
+
+    @Override
+    public void onBufferUpdate(int time) {
+        try {
+            ReportManager.suReport(mXAdInstance.middleMonitor, time / SDKConstant.MILLION_UNIT);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -282,14 +190,102 @@ public class VideoAdSlot implements ADVideoPlayerListener {
         mVideoView.setIsRealPause(true);
     }
 
-    @Override
-    public void onBufferUpdate(int time) {
-        try {
-            ReportManager.suReport(mXAdInstance.middleMonitor, time / SDKConstant.MILLION_UNIT);
-        } catch (Exception e) {
-            e.printStackTrace();
+    private boolean isPlaying() {
+        if (mVideoView != null) {
+            return mVideoView.isPlaying();
+        }
+        return false;
+    }
+
+    private boolean isRealPause() {
+        if (mVideoView != null) {
+            return mVideoView.isRealPause();
+        }
+        return false;
+    }
+
+    private boolean isComplete() {
+        if (mVideoView != null) {
+            return mVideoView.isComplete();
+        }
+        return false;
+    }
+
+    private void pauseVideo(boolean isAuto) {
+        if (mVideoView != null) {
+            if (isAuto) {
+                //发自动暂停监测
+                if (!isRealPause() && isPlaying()) {
+                    try {
+                        ReportManager.pauseVideoReport(mXAdInstance.event.pause.content, getPosition());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            mVideoView.seekAndPause(0);
         }
     }
+
+    private void resumeVideo() {
+        if (mVideoView != null) {
+            mVideoView.resume();
+            if (isPlaying()) {
+                sendSUSReport(true); //发自动播放监测
+            }
+        }
+    }
+
+    public void updateAdInScrollView() {
+        int currentArea = Utils.getVisiblePercent(mParentView);
+        //小于0表示未出现在屏幕上，不做任何处理
+        if (currentArea <= 0) {
+            return;
+        }
+        //刚要滑入和滑出时，异常状态的处理
+        if (Math.abs(currentArea - lastArea) >= 100) {
+            return;
+        }
+        if (currentArea < SDKConstant.VIDEO_SCREEN_PERCENT) {
+            //进入自动暂停状态
+            if (canPause) {
+                pauseVideo(true);
+                canPause = false;
+            }
+            lastArea = 0;
+            mVideoView.setIsComplete(false); // 滑动出50%后标记为从头开始播
+            mVideoView.setIsRealPause(false); //以前叫setPauseButtonClick()
+            return;
+        }
+
+        if (isRealPause() || isComplete()) {
+            //进入手动暂停或者播放结束，播放结束和不满足自动播放条件都作为手动暂停
+            pauseVideo(false);
+            canPause = false;
+            return;
+        }
+
+        //满足自动播放条件或者用户主动点击播放，开始播放
+        if (Utils.canAutoPlay(mContext, AdParameters.getCurrentSetting())
+                || isPlaying()) {
+            lastArea = currentArea;
+            resumeVideo();
+            canPause = true;
+            mVideoView.setIsRealPause(false);
+        } else {
+            pauseVideo(false);
+            //不能自动播放则设置为手动暂停效果
+            mVideoView.setIsRealPause(true);
+        }
+    }
+
+    public void destroy() {
+        mVideoView.destroy();
+        mVideoView = null;
+        mContext = null;
+        mXAdInstance = null;
+    }
+
 
     private int getPosition() {
         return mVideoView.getCurrentPosition() / SDKConstant.MILLION_UNIT;

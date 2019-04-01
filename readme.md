@@ -1,9 +1,9 @@
 # 组件化封装思想实战 
-#### fragment的几种切换模式
+## fragment的几种切换模式
     - add+show/hide，replace，attach/detach
     - attach/detach很少用到，不会销毁fragment，而是会销毁fragment的view
 
-#### Charles，网络请求组件
+##Charles，网络请求组件
 - 异步图片加载， Universal-Image-Loader
     - ImageLoaderConfiguration ：为ImageLoader配置参数
     - DisplayImageOptions：为我们显示图片的时候进行配置
@@ -12,7 +12,7 @@
     - 平常心吧，多了解些东西，基础东西很重要
  
 
-#### HomeFragment一些思路   
+## HomeFragment一些思路   
 - ListView中如何使用一个二维的数据结构？
 - ViewPager如何实现无限循环滑动？
 ```xml
@@ -45,7 +45,7 @@ ad.start();
  startActivityForResult(wrapperIntent, REQUEST_CODE);
 ```
 
-#### 视屏播放器
+## 视屏播放器
 - 一些实现方式
     - VideoView
     - MediaPlayer + SurfaceView
@@ -93,3 +93,9 @@ void onSurfaceTextureUpdated(SurfaceTexture surface)
     - 计算播放器在屏幕中出现的百分比
     - 小屏播放到全屏播放能复用一个播放器，这个功能试过很多次了，即使高级开发工程师也不一定一眼看出来某些功能一眼就能实现与否
     - 监听播放器产生的各种事件
+
+
+互相创建彼此对象，进行彼此之间的方法调用，耦合度百分比，不可取，采用接口回调机制。
+
+部分手机可以用下面这种方式暂停，但有些不确定机型这种方式暂停不了，所以还是使用setOnSeekCompleteListener回调方式，这个方式适配了全部机型。
+mediaPlayer.pause();

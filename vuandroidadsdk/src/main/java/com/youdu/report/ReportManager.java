@@ -65,6 +65,7 @@ public class ReportManager {
                     }
                     params.put("ve", String.valueOf(playTime));
                 }
+                // 这就是组件化封装思想的体现，这个APP全部都是这种封装思想
                 CommonOkHttpClient.get(
                     CommonRequest.createMonitorRequest(monitor.url, params), handle);
             }

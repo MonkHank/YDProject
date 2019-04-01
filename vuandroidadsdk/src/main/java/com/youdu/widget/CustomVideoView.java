@@ -45,9 +45,7 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
         MediaPlayer.OnPreparedListener, MediaPlayer.OnInfoListener, MediaPlayer.OnErrorListener,
         MediaPlayer.OnCompletionListener, MediaPlayer.OnBufferingUpdateListener,
         TextureView.SurfaceTextureListener {
-    /**
-     * Constant
-     */
+    /*** Constant*/
     private static final String TAG = "MraidVideoView";
     private static final int TIME_MSG = 0x01;
     private static final int TIME_INVAL = 1000;
@@ -57,9 +55,8 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
     private static final int STATE_PAUSING = 2;
     /*** 若失败后再次加载的总次数*/
     private static final int LOAD_TOTAL_COUNT = 3;
-    /**
-     * UI
-     */
+
+    /*** UI*/
     private ViewGroup mParentContainer;
     private RelativeLayout mPlayerView;
     private TextureView mVideoView;
@@ -70,17 +67,13 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
     private AudioManager audioManager;
     private Surface videoSurface;
 
-    /**
-     * Data
-     */
+    /*** Data*/
     private String mUrl;
     private String mFrameURI;
     private boolean isMute;
     private int mScreenWidth, mDestationHeight;
 
-    /**
-     * Status状态保护
-     */
+    /*** Status状态保护*/
     private boolean canPlay = true;
     private boolean mIsRealPause;
     private boolean mIsComplete;
@@ -516,7 +509,7 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
         }
     }
 
-    //跳到指定点暂停视频
+    /*** 跳到指定点暂停视频*/
     public void seekAndPause(int position) {
         if (this.playerState != STATE_PLAYING) {
             return;
@@ -525,9 +518,13 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
         setCurrentPlayState(STATE_PAUSING);
         if (isPlaying()) {
             mediaPlayer.seekTo(position);
+            // 部分手机可以用这种方式暂停，但有些不确定机型这种方式暂停不了，
+            // 所以还是使用setOnSeekCompleteListener回调方式，这个方式适配了全部机型
+//            mediaPlayer.pause();
             mediaPlayer.setOnSeekCompleteListener(new OnSeekCompleteListener() {
                 @Override
                 public void onSeekComplete(MediaPlayer mp) {
+                    // 跳转事件结束后，暂停播放
                     LogUtils.d(TAG, "do seek and pause");
                     mediaPlayer.pause();
                     mHandler.removeCallbacksAndMessages(null);
@@ -550,8 +547,6 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
     private void setCurrentPlayState(int state) {
         playerState = state;
     }
-
-
 
 
     public void setListener(ADVideoPlayerListener listener) {
@@ -659,21 +654,22 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
      */
     public interface ADVideoPlayerListener {
 
-        public void onBufferUpdate(int time);
+        /*** 播放器播放到了第几秒*/
+        void onBufferUpdate(int time);
 
-        public void onClickFullScreenBtn();
+        void onClickFullScreenBtn();
 
-        public void onClickVideo();
+        void onClickVideo();
 
-        public void onClickBackBtn();
+        void onClickBackBtn();
 
-        public void onClickPlay();
+        void onClickPlay();
 
-        public void onAdVideoLoadSuccess();
+        void onAdVideoLoadSuccess();
 
-        public void onAdVideoLoadFailed();
+        void onAdVideoLoadFailed();
 
-        public void onAdVideoLoadComplete();
+        void onAdVideoLoadComplete();
     }
 
     public interface ADFrameImageLoadListener {
