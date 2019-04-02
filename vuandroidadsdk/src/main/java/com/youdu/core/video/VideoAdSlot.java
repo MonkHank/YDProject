@@ -69,7 +69,7 @@ public class VideoAdSlot implements ADVideoPlayerListener {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        //获取videoview在当前界面的属性
+        //获取VideoView在当前界面的属性
         Bundle bundle = Utils.getViewProperty(mParentView);
         mParentView.removeView(mVideoView);
         VideoFullDialog dialog = new VideoFullDialog(mContext, mVideoView, mXAdInstance,
@@ -85,7 +85,8 @@ public class VideoAdSlot implements ADVideoPlayerListener {
                 bigPlayComplete();
             }
         });
-        dialog.setViewBundle(bundle); //为Dialog设置播放器数据Bundle对象
+        //为Dialog设置播放器数据Bundle对象
+        dialog.setViewBundle(bundle);
         dialog.setSlotListener(mSlotListener);
         dialog.show();
     }
@@ -94,19 +95,22 @@ public class VideoAdSlot implements ADVideoPlayerListener {
         if (mVideoView.getParent() == null) {
             mParentView.addView(mVideoView);
         }
-        mVideoView.setTranslationY(0); //防止动画导致偏离父容器
+        //防止动画导致偏离父容器
+        mVideoView.setTranslationY(0);
         mVideoView.isShowFullBtn(true);
         mVideoView.mute(true);
         mVideoView.setListener(this);
         mVideoView.seekAndResume(position);
-        canPause = true; // 标为可自动暂停
+        // 标为可自动暂停
+        canPause = true;
     }
 
     private void bigPlayComplete() {
         if (mVideoView.getParent() == null) {
             mParentView.addView(mVideoView);
         }
-        mVideoView.setTranslationY(0); //防止动画导致偏离父容器
+        //防止动画导致偏离父容器
+        mVideoView.setTranslationY(0);
         mVideoView.isShowFullBtn(true);
         mVideoView.mute(true);
         mVideoView.setListener(this);
@@ -125,10 +129,10 @@ public class VideoAdSlot implements ADVideoPlayerListener {
 
     @Override
     public void onClickVideo() {
-        String desationUrl = mXAdInstance.clickUrl;
+        String destinationUrl = mXAdInstance.clickUrl;
         if (mSlotListener != null) {
-            if (mVideoView.isFrameHidden() && !TextUtils.isEmpty(desationUrl)) {
-                mSlotListener.onClickVideo(desationUrl);
+            if (mVideoView.isFrameHidden() && !TextUtils.isEmpty(destinationUrl)) {
+                mSlotListener.onClickVideo(destinationUrl);
                 try {
                     ReportManager.pauseVideoReport(mXAdInstance.clickMonitor, mVideoView.getCurrentPosition()
                             / SDKConstant.MILLION_UNIT);
@@ -138,7 +142,7 @@ public class VideoAdSlot implements ADVideoPlayerListener {
             }
         } else {
             //走默认样式
-            if (mVideoView.isFrameHidden() && !TextUtils.isEmpty(desationUrl)) {
+            if (mVideoView.isFrameHidden() && !TextUtils.isEmpty(destinationUrl)) {
                 Intent intent = new Intent(mContext, AdBrowserActivity.class);
                 intent.putExtra(AdBrowserActivity.KEY_URL, mXAdInstance.clickUrl);
                 mContext.startActivity(intent);
@@ -236,6 +240,7 @@ public class VideoAdSlot implements ADVideoPlayerListener {
         }
     }
 
+    /*** 实现滑入播放，划出暂停，整个业务层最复杂的方法，不断测试，不断改8，才有最终结果*/
     public void updateAdInScrollView() {
         int currentArea = Utils.getVisiblePercent(mParentView);
         //小于0表示未出现在屏幕上，不做任何处理
@@ -253,8 +258,10 @@ public class VideoAdSlot implements ADVideoPlayerListener {
                 canPause = false;
             }
             lastArea = 0;
-            mVideoView.setIsComplete(false); // 滑动出50%后标记为从头开始播
-            mVideoView.setIsRealPause(false); //以前叫setPauseButtonClick()
+            // 滑动出50%后标记为从头开始播
+            mVideoView.setIsComplete(false);
+            //以前叫setPauseButtonClick()
+            mVideoView.setIsRealPause(false);
             return;
         }
 

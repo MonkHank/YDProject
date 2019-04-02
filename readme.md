@@ -98,7 +98,15 @@ void onSurfaceTextureUpdated(SurfaceTexture surface)
 互相创建彼此对象，进行彼此之间的方法调用，耦合度百分比，不可取，采用接口回调机制。
 
 ```java
-// 部分手机可以用下面这种方式暂停，但有些不确定机型这种方式暂停不了，所以还是使用setOnSeekCompleteListener回调方式，这个方式适配了全部机型。
+// 部分手机可以用下面这种方式暂停视频播放，但有些不确定机型这种方式暂停不了，
+// 所以还是使用setOnSeekCompleteListener回调方式，这个方式适配了全部机型。
 mediaPlayer.pause();
 ```
+- 小屏到全屏功能开发
+    - 启动新Activity，需要加载两次，资源消耗较大
+    - 创建一个全屏显示Dialog显示，资源消耗比较小
+    
+Dialog生命周期相关函数，onCreate、onWindowFocusChanged、dismiss
+
+接口回调三步曲
 

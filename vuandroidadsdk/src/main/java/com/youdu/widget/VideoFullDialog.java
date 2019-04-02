@@ -54,6 +54,7 @@ public class VideoFullDialog extends Dialog implements ADVideoPlayerListener {
         super(context, R.style.dialog_full_screen);
         mContext = context;
         mXAdInstance = instance;
+        // 断点续播
         mPosition = position;
         mVideoView = mraidView;
     }
@@ -72,17 +73,10 @@ public class VideoFullDialog extends Dialog implements ADVideoPlayerListener {
         mStartBundle = bundle;
     }
 
-    public void setListener(FullToSmallListener listener) {
-        this.mListener = listener;
-    }
-
 //    public void setFrameLoadListener(XADFrameImageLoadListener listener) {
 //        this.mFrameLoadListener = listener;
 //    }
 
-    public void setSlotListener(AdSDKSlotListener slotListener) {
-        this.mSlotListener = slotListener;
-    }
 
     private void initVideoView() {
         mParentView = (RelativeLayout) findViewById(R.id.content_layout);
@@ -124,7 +118,7 @@ public class VideoFullDialog extends Dialog implements ADVideoPlayerListener {
             mPosition = mVideoView.getCurrentPosition();
             mVideoView.pauseForFullScreen();
         } else {
-            if (isFirst) { //为了适配某些手机不执行seekandresume中的播放方法
+            if (isFirst) { //为了适配某些手机(华为）不执行seekandresume中的播放方法
                 mVideoView.seekAndResume(mPosition);
             } else {
                 mVideoView.resume();
@@ -136,6 +130,7 @@ public class VideoFullDialog extends Dialog implements ADVideoPlayerListener {
     @Override
     public void dismiss() {
         LogUtils.e(TAG, "dismiss");
+        // 一个view只能有一个ViewParent，如果不这样做，回到小屏时候重新添加view会报错
         mParentView.removeView(mVideoView);
         super.dismiss();
     }
@@ -245,6 +240,9 @@ public class VideoFullDialog extends Dialog implements ADVideoPlayerListener {
     public void onAdVideoLoadFailed() {
     }
 
+    /**
+     * 与小屏播放处理不一样，单独处理
+     */
     @Override
     public void onAdVideoLoadComplete() {
         try {
@@ -276,7 +274,23 @@ public class VideoFullDialog extends Dialog implements ADVideoPlayerListener {
 
     }
 
+    public void setSlotListener(AdSDKSlotListener slotListener) {
+        this.mSlotListener = slotListener;
+    }
+
+    /**
+     * 注入事件监听类，还有可以通过三方库Jackto实现
+     * @param listener
+     */
+    public void setListener(FullToSmallListener listener) {
+        this.mListener = listener;
+    }
+
     public interface FullToSmallListener {
+        /**
+         * 全屏播放中点击关闭按钮或者back键时回调
+         * @param position
+         */
         void getCurrentPlayPosition(int position);
 
         void playComplete();//全屏播放结束时回调

@@ -56,12 +56,6 @@ public class VideoAdContext implements AdSDKSlotListener {
         }
     }
 
-    /**
-     * release the ad
-     */
-    public void destroy() {
-        mAdSlot.destroy();
-    }
 
     public void setAdResultListener(AdContextInterface listener) {
         this.mListener = listener;
@@ -74,6 +68,13 @@ public class VideoAdContext implements AdSDKSlotListener {
         if (mAdSlot != null) {
             mAdSlot.updateAdInScrollView();
         }
+    }
+
+    /**
+     * release the ad
+     */
+    public void destroy() {
+        mAdSlot.destroy();
     }
 
     @Override
