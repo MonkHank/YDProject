@@ -43,7 +43,7 @@ public class Utils {
     return (int) (pxValue / scale);
   }
 
-  /*** 获取当前view在屏幕中的百分比*/
+  /*** 获取当前播放矩形位于播放view的百分比*/
   public static int getVisiblePercent(View pView) {
     if (pView != null && pView.isShown()) {
       DisplayMetrics displayMetrics = pView.getContext().getResources().getDisplayMetrics();

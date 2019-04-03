@@ -108,5 +108,32 @@ mediaPlayer.pause();
     
 Dialog生命周期相关函数，onCreate、onWindowFocusChanged、dismiss
 
-接口回调三步曲
+接口回调三步曲，接口回调的核心是先从接口层使用接口引用调用方法，其次是以对象的形式实现该方法做自己具体的逻辑处理
 
+- CustomVideoView
+     - <font face="黑体">TextureView + MediaPlayer</font>
+     - <font face="黑体">ADVideoPlayerListener</font>
+     - 加载的view显示隐藏处理，帧动画处理
+     ```java
+     // 获取到帧动画，对mLoadingBar控件background的 animation-list 进行播放，
+     // 可以设置 animaition-list oneShot="false" 进行循环
+     AnimationDrawable anim = (AnimationDrawable) mLoadingBar.getBackground();
+    anim.start();
+     ```
+     - 加载失败后的再加载次数(mCurrentCount)
+     - <font face="黑体">mp.preparedAsync()</font>成功后接口回调<font face="黑体">onAdVideoLoadSuccess()</font>
+     - 自动播放条件，当前View在屏幕中占比大于一半；获取view的屏幕占比
+     ```java
+      // 获取到当前view在屏幕中出现的一个矩形
+      Rect rect = new Rect();
+      pView.getGlobalVisibleRect(rect);
+     ```
+     - <font face="黑体">mp.start()</font>后开启播放
+     - 正常播放结束后<font face="黑体">onCompletion(MP)</font>的回调<font face="黑体">onAdVideoLoadComplete()</font>
+     - 播放异常 <font face="黑体">onError(MP..)</font> 的回调 <font face="黑体">onAdVideoLoadFailed()</font>
+    - <font face="黑体">mp.reset()、mp.pause()、mp.stop()、mp.release()</font> 方法运用
+    -  <font color="de97">Activity转后台后的处理</font> <font face="黑体">onVisibilityChanged(View，int)</font>
+    - <font face="黑体"> onTouchEvent()自己处理</font>
+    - 静音处理
+    - <font face="黑体">不自动播放，点击播放按钮播放，回调 onClickPlay()</font>
+    - 全屏播放策略、小屏播放策略、跳转Activity后续播策略

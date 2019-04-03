@@ -30,8 +30,7 @@ public class VideoAdContext implements AdSDKSlotListener {
     private AdContextInterface mListener;
     private ADFrameImageLoadListener mFrameLoadListener;
 
-    public VideoAdContext(ViewGroup parentView, String instance,
-                          ADFrameImageLoadListener frameLoadListener) {
+    public VideoAdContext(ViewGroup parentView, String instance, ADFrameImageLoadListener frameLoadListener) {
         this.mParentView = parentView;
         this.mInstance = (AdValue) ResponseEntityToModule.
                 parseJsonToModule(instance, AdValue.class);

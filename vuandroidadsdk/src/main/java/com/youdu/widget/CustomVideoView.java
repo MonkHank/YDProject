@@ -60,11 +60,14 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
     private ViewGroup mParentContainer;
     private RelativeLayout mPlayerView;
     private TextureView mVideoView;
+    /*** 播放按钮*/
     private Button mMiniPlayBtn;
     private ImageView mFullBtn;
     private ImageView mLoadingBar;
+    /*** 占位图*/
     private ImageView mFrameView;
     private AudioManager audioManager;
+    /*** 用于接收视频数据，可以是SurfaceView，也可以是 TextureView 对应的 Surface */
     private Surface videoSurface;
 
     /*** Data*/
@@ -77,6 +80,7 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
     private boolean canPlay = true;
     private boolean mIsRealPause;
     private boolean mIsComplete;
+    /*** 记录当前播放失败需要重新加载的次数*/
     private int mCurrentCount;
     private int playerState = STATE_IDLE;
 
@@ -128,7 +132,6 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
         initSmallLayoutMode(); //init the small mode
     }
 
-
     /*** 小模式状态*/
     private void initSmallLayoutMode() {
         LayoutParams params = new LayoutParams(mScreenWidth, mDestationHeight);
@@ -170,31 +173,11 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
 
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-        return false;
+        return true;
     }
 
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-    }
-
-
-    /*** TextureView 准备好之后再调用，而不是在构造方法中调用*/
-    public void load() {
-        if (this.playerState != STATE_IDLE) {
-            return;
-        }
-        LogUtils.d(TAG, "do play url = " + this.mUrl);
-        showLoadingView();
-        try {
-            setCurrentPlayState(STATE_IDLE);
-            checkMediaPlayer();
-            mute(true);
-            mediaPlayer.setDataSource(this.mUrl);
-            mediaPlayer.prepareAsync(); //开始异步加载
-        } catch (Exception e) {
-            LogUtils.e(TAG, e.getMessage());
-            stop(); //error以后重新调用stop加载
-        }
     }
 
     private synchronized void checkMediaPlayer() {
@@ -224,6 +207,25 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
         return mediaPlayer;
     }
 
+    /*** TextureView 的 SurfaceTexture 准备好之后再调用，而不是在构造方法中调用*/
+    private void load() {
+        if (this.playerState != STATE_IDLE) {
+            return;
+        }
+        LogUtils.d(TAG, "do play url = " + this.mUrl);
+        showLoadingView();
+        try {
+            setCurrentPlayState(STATE_IDLE);
+            checkMediaPlayer();
+            mute(true);
+            mediaPlayer.setDataSource(this.mUrl);
+            mediaPlayer.prepareAsync(); //开始异步加载
+        } catch (Exception e) {
+            LogUtils.e(TAG, e.getMessage());
+            stop(); //error以后重新调用stop加载
+        }
+    }
+
     @Override
     public void onPrepared(MediaPlayer mp) {
         LogUtils.i(TAG, "onPrepared");
@@ -236,9 +238,8 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
                 listener.onAdVideoLoadSuccess();
             }
             //满足自动播放条件，则直接播放
-            if (Utils.canAutoPlay(getContext(),
-                    AdParameters.getCurrentSetting()) &&
-                    Utils.getVisiblePercent(mParentContainer) > SDKConstant.VIDEO_SCREEN_PERCENT) {
+            if (Utils.canAutoPlay(getContext(), AdParameters.getCurrentSetting())
+                    && Utils.getVisiblePercent(mParentContainer) > SDKConstant.VIDEO_SCREEN_PERCENT) {
                 setCurrentPlayState(STATE_PAUSING);
                 resume();
             } else {
@@ -274,6 +275,19 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
         }
         this.stop();//去重新load
         return true;
+    }
+
+    /*** 播放完成后回到初始状态*/
+    public void playBack() {
+        LogUtils.d(TAG, " do playBack");
+        setCurrentPlayState(STATE_PAUSING);
+        mHandler.removeCallbacksAndMessages(null);
+        if (mediaPlayer != null) {
+            mediaPlayer.setOnSeekCompleteListener(null);
+            mediaPlayer.seekTo(0);
+            mediaPlayer.pause();
+        }
+        this.showPauseView(false);
     }
 
     public void resume() {
@@ -347,19 +361,6 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
         showPauseView(false);
     }
 
-    /*** 播放完成后回到初始状态*/
-    public void playBack() {
-        LogUtils.d(TAG, " do playBack");
-        setCurrentPlayState(STATE_PAUSING);
-        mHandler.removeCallbacksAndMessages(null);
-        if (mediaPlayer != null) {
-            mediaPlayer.setOnSeekCompleteListener(null);
-            mediaPlayer.seekTo(0);
-            mediaPlayer.pause();
-        }
-        this.showPauseView(false);
-    }
-
 
     /*** 当前activity转入后台后的处理*/
     @Override
@@ -383,10 +384,37 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
         super.onDetachedFromWindow();
     }
 
-
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         return true;
+    }
+
+    private void showLoadingView() {
+        mFullBtn.setVisibility(View.GONE);
+        mLoadingBar.setVisibility(View.VISIBLE);
+        AnimationDrawable anim = (AnimationDrawable) mLoadingBar.getBackground();
+        anim.start();
+        mMiniPlayBtn.setVisibility(View.GONE);
+        mFrameView.setVisibility(View.GONE);
+        loadFrameImage();
+    }
+
+    /*** 异步加载定帧图（没卵用的方法，没有地方给它执行）*/
+    private void loadFrameImage() {
+        if (mFrameLoadListener != null) {
+            mFrameLoadListener.onStartFrameLoad(mFrameURI, new ImageLoaderListener() {
+                @Override
+                public void onLoadingComplete(Bitmap loadedImage) {
+                    if (loadedImage != null) {
+                        mFrameView.setScaleType(ScaleType.FIT_XY);
+                        mFrameView.setImageBitmap(loadedImage);
+                    } else {
+                        mFrameView.setScaleType(ScaleType.FIT_CENTER);
+                        mFrameView.setImageResource(R.drawable.xadsdk_img_error);
+                    }
+                }
+            });
+        }
     }
 
     /**
@@ -442,12 +470,10 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
         }
     }
 
-
     @Override
     public boolean onInfo(MediaPlayer mp, int what, int extra) {
         return true;
     }
-
 
     @Override
     public void onBufferingUpdate(MediaPlayer mp, int percent) {
@@ -460,7 +486,6 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
     public void setFrameURI(String url) {
         mFrameURI = url;
     }
-
 
     //全屏不显示暂停状态,后续可以整合，不必单独出一个方法
     public void pauseForFullScreen() {
@@ -534,9 +559,7 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
     }
 
 
-    /**
-     * 进入播放状态时的状态更新
-     */
+    /*** 进入播放状态时的状态更新*/
     private void entryResumeState() {
         canPlay = true;
         setCurrentPlayState(STATE_PLAYING);
@@ -548,7 +571,6 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
         playerState = state;
     }
 
-
     public void setListener(ADVideoPlayerListener listener) {
         this.listener = listener;
     }
@@ -557,6 +579,13 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
         this.mFrameLoadListener = frameLoadListener;
     }
 
+
+    private void showPlayView() {
+        mLoadingBar.clearAnimation();
+        mLoadingBar.setVisibility(View.GONE);
+        mMiniPlayBtn.setVisibility(View.GONE);
+        mFrameView.setVisibility(View.GONE);
+    }
 
     private void showPauseView(boolean show) {
         mFullBtn.setVisibility(show ? View.VISIBLE : View.GONE);
@@ -571,42 +600,6 @@ public class CustomVideoView extends RelativeLayout implements View.OnClickListe
         }
     }
 
-    private void showLoadingView() {
-        mFullBtn.setVisibility(View.GONE);
-        mLoadingBar.setVisibility(View.VISIBLE);
-        AnimationDrawable anim = (AnimationDrawable) mLoadingBar.getBackground();
-        anim.start();
-        mMiniPlayBtn.setVisibility(View.GONE);
-        mFrameView.setVisibility(View.GONE);
-        loadFrameImage();
-    }
-
-    private void showPlayView() {
-        mLoadingBar.clearAnimation();
-        mLoadingBar.setVisibility(View.GONE);
-        mMiniPlayBtn.setVisibility(View.GONE);
-        mFrameView.setVisibility(View.GONE);
-    }
-
-    /**
-     * 异步加载定帧图
-     */
-    private void loadFrameImage() {
-        if (mFrameLoadListener != null) {
-            mFrameLoadListener.onStartFrameLoad(mFrameURI, new ImageLoaderListener() {
-                @Override
-                public void onLoadingComplete(Bitmap loadedImage) {
-                    if (loadedImage != null) {
-                        mFrameView.setScaleType(ScaleType.FIT_XY);
-                        mFrameView.setImageBitmap(loadedImage);
-                    } else {
-                        mFrameView.setScaleType(ScaleType.FIT_CENTER);
-                        mFrameView.setImageResource(R.drawable.xadsdk_img_error);
-                    }
-                }
-            });
-        }
-    }
 
     private void unRegisterBroadcastReceiver() {
         if (mScreenReceiver != null) {

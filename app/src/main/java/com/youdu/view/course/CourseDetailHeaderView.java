@@ -102,8 +102,7 @@ public class CourseDetailHeaderView extends RelativeLayout {
             mContentLayout.addView(createItem(url));
         }
         if (!TextUtils.isEmpty(mData.video.resource)) {
-            new VideoAdContext(mVideoLayout,
-                    new Gson().toJson(mData.video), null);
+            new VideoAdContext(mVideoLayout, new Gson().toJson(mData.video), null);
         }
     }
 
